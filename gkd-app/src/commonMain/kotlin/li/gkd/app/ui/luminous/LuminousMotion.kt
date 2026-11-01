@@ -1,7 +1,5 @@
 package li.gkd.app.ui.luminous
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.LinearEasing
@@ -110,19 +108,23 @@ fun Modifier.luminousRipple(
     enabled: Boolean = true,
 ): Modifier {
     if (!enabled) return this
-    val progress = remember { Animatable(0f) }
     var origin by remember { mutableStateOf(Offset.Zero) }
+    var pressed by remember { mutableStateOf(false) }
+    // 状态驱动：按下涟漪扩散淡出，松手回缩（避免在非挂起手势作用域里调用挂起动画）
+    val progress by animateFloatAsState(
+        targetValue = if (pressed) 1f else 0f,
+        animationSpec = tween(durationMillis = 420, easing = LinearEasing),
+        label = "luminousRipple",
+    )
     return this
         .pointerInput(Unit) {
             awaitEachGesture {
                 // requireUnconsumed = false：保证子组件仍可正常响应点击
                 val down = awaitFirstDown(requireUnconsumed = false)
                 origin = down.position
-                progress.snapTo(0f)
-                progress.animateTo(1f, tween(durationMillis = 380, easing = LinearEasing))
+                pressed = true
                 waitForUpOrCancellation()
-                progress.animateTo(1.12f, tween(durationMillis = 180, easing = LinearEasing))
-                progress.snapTo(0f)
+                pressed = false
             }
         }
         .then(
@@ -131,17 +133,16 @@ fun Modifier.luminousRipple(
 }
 
 private fun Modifier.drawRippleContent(
-    progress: Animatable<Float, AnimationVector1D>,
+    progress: Float,
     origin: Offset,
     color: Color,
     radius: Dp,
 ): Modifier =
     this.drawWithContent {
         drawContent()
-        val value = progress.value
-        if (value > 0f && value < 1.12f) {
-            val r = radius.toPx() * value
-            val alpha = (1f - value).coerceIn(0f, 1f)
+        if (progress > 0.005f) {
+            val r = radius.toPx() * (0.2f + 0.8f * progress)
+            val alpha = (1f - progress).coerceIn(0f, 1f)
             drawCircle(
                 brush =
                     Brush.radialGradient(
