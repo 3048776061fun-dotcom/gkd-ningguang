@@ -11,6 +11,7 @@ import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -37,7 +38,7 @@ fun Modifier.luminousHalo(
     followTouch: Boolean = true,
 ): Modifier {
     val transition = rememberInfiniteTransition(label = "luminousHalo")
-    val phases =
+    val phases: List<State<Float>> =
         listOf(
             transition.animateFloat(
                 initialValue = 0f,
