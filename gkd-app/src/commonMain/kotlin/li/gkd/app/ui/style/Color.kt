@@ -2,18 +2,22 @@ package li.gkd.app.ui.style
 
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import li.gkd.app.ui.luminous.LocalLuminous
 import li.songe.json5.Json5
 import li.songe.json5.Json5SyntaxKind
 
+/**
+ * 卡片底色改为半透明：ColorOS 17 凝光视效要求界面「通透纯净」，
+ * 让底部的环境光晕可以透过卡片，同时保持图标与文字清晰可读。
+ */
 val surfaceCardColors: CardColors
     @Composable
-    get() = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+    get() = CardDefaults.cardColors(containerColor = LocalLuminous.current.cardFill)
 
 private fun getDarkJson5SyntaxColor(kind: Json5SyntaxKind): Color =
     when (kind) {
