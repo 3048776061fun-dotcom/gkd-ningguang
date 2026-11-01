@@ -129,5 +129,4 @@ fun Modifier.luminousHalo(
 
 /** 只绘制静态的环境光晕（用于不希望响应触摸的容器，例如列表头部）。 */
 @Composable
-fun Modifier.luminousAmbient(spec: LuminousSpec = LocalLuminous.current): Modifier =
-    luminousHalo(spec = spec, followTouch = false)
+fun Modifier.luminousAmbient(spec: LuminousSpec = LocalLuminous.current): Modifier = luminousHalo(spec = spec, followTouch = false)
