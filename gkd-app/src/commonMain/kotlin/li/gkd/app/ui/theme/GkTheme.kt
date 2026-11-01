@@ -6,7 +6,11 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import li.gkd.app.ui.luminous.LocalLuminous
+import li.gkd.app.ui.luminous.luminousSpec
 
 @Composable
 fun GkTheme(
@@ -14,7 +18,11 @@ fun GkTheme(
     typography: Typography = Typography(),
     content: @Composable () -> Unit,
 ) {
-    MaterialTheme(colorScheme = colorScheme.animation(), typography = typography, content = content)
+    // 凝光视效规格由主题主色推导，因此动态取色/深浅主题切换时会自动跟随
+    val luminous = remember(colorScheme) { luminousSpec(colorScheme) }
+    CompositionLocalProvider(LocalLuminous provides luminous) {
+        MaterialTheme(colorScheme = colorScheme.animation(), typography = typography, content = content)
+    }
 }
 
 @Composable
