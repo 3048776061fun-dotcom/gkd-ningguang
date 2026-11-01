@@ -1,14 +1,13 @@
 package li.gkd.app.ui.home
 
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
-import li.gkd.app.ui.component.GkIcon
 import li.gkd.app.ui.component.GkScaffold
+import li.gkd.app.ui.luminous.LuminousNavItem
+import li.gkd.app.ui.luminous.LuminousNavigationBar
+import org.jetbrains.compose.resources.stringResource
 
 // A desktop device profile supplies Android's bottom inset; Android uses native defaults.
 val LocalHomeNavigationInsets = staticCompositionLocalOf<WindowInsets?> { null }
@@ -19,24 +18,20 @@ fun GkHomeScaffold(
     selectedTab: BottomNavItem,
     onSelectTab: (BottomNavItem) -> Unit,
 ) {
+    val tabs = BottomNavItem.allSubObjects
+    val navItems =
+        tabs.map { item -> LuminousNavItem(icon = item.icon, label = stringResource(item.labelResource)) }
     GkScaffold(
         modifier = page.modifier,
         topBar = page.topBar,
         floatingActionButton = page.floatingActionButton,
         bottomBar = {
-            NavigationBar(
-                windowInsets =
-                    LocalHomeNavigationInsets.current ?: NavigationBarDefaults.windowInsets,
-            ) {
-                BottomNavItem.allSubObjects.forEach { item ->
-                    NavigationBarItem(
-                        selected = item == selectedTab,
-                        onClick = { onSelectTab(item) },
-                        icon = { GkIcon(item.icon, contentDescription = null) },
-                        label = { Text(item.label) },
-                    )
-                }
-            }
+            LuminousNavigationBar(
+                selectedIndex = tabs.indexOf(selectedTab).coerceAtLeast(0),
+                items = navItems,
+                onSelect = { index -> onSelectTab(tabs[index]) },
+                windowInsets = LocalHomeNavigationInsets.current ?: NavigationBarDefaults.windowInsets,
+            )
         },
         content = page.content,
     )
