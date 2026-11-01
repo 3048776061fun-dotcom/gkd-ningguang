@@ -1,8 +1,8 @@
 package li.gkd.app.ui.luminous
 
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -10,8 +10,10 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -62,7 +64,17 @@ fun Modifier.luminousHalo(
         )
 
     val pointer = remember { mutableStateOf(Offset.Unspecified) }
-    val touchAlpha = remember { Animatable(0f) }
+    var touching by remember { mutableStateOf(false) }
+    // 光随指弥散的强度：按下淡入、松手淡出（状态驱动，避免在非挂起手势作用域里调用挂起动画）
+    val touchAlpha by animateFloatAsState(
+        targetValue = if (touching) 1f else 0f,
+        animationSpec =
+            tween(
+                durationMillis = if (touching) 240 else 560,
+                easing = LinearEasing,
+            ),
+        label = "luminousTouchAlpha",
+    )
 
     return this
         .then(
@@ -71,11 +83,10 @@ fun Modifier.luminousHalo(
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)
                         pointer.value = down.position
-                        touchAlpha.snapTo(0f)
-                        touchAlpha.animateTo(1f, tween(durationMillis = 240, easing = LinearEasing))
+                        touching = true
                         val up = waitForUpOrCancellation()
                         if (up != null) pointer.value = up.position
-                        touchAlpha.animateTo(0f, tween(durationMillis = 560, easing = LinearEasing))
+                        touching = false
                     }
                 }
             } else {
@@ -109,10 +120,9 @@ fun Modifier.luminousHalo(
             }
 
             // 光随指弥散：按下处的一团柔光
-            val touchValue = touchAlpha.value
-            if (touchValue > 0f && pointer.value != Offset.Unspecified) {
+            if (touchAlpha > 0f && pointer.value != Offset.Unspecified) {
                 val r = maxSide * 0.42f
-                val a = touchValue
+                val a = touchAlpha
                 drawCircle(
                     brush =
                         Brush.radialGradient(
