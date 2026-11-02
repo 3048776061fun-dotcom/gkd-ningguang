@@ -3,6 +3,7 @@ package li.gkd.app.ui.luminous
 import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import kotlin.math.pow
 
 /**
  * ColorOS 17 「凝光视效 (Luminous Effect)」 视觉规格。
@@ -97,7 +98,7 @@ private fun linearChannel(value: Float): Float =
     if (value <= 0.03928f) {
         value / 12.92f
     } else {
-        kotlin.math.pow(((value + 0.055f) / 1.055f).toDouble(), 2.4).toFloat()
+        ((value + 0.055f) / 1.055f).toDouble().pow(2.4).toFloat()
     }
 
 private fun mixColor(
